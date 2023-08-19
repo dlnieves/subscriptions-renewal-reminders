@@ -1,10 +1,11 @@
 <?php
 
 /**
+ * Added lang attribute
  * @package  RenewalReminders
  * 
  */
-function sprr_renewalremindersemail($subscriber_details_first_name, $subscriber_details_last_name, $next_payment_date)
+function sprr_renewalremindersemail($subscriber_details_first_name, $subscriber_details_last_name, $next_payment_date, $lang = "en")
 {
 	ob_start(); // We have to turn on output buffering. VERY IMPORTANT! or else wp_mail() wont work 
 ?>
@@ -62,7 +63,7 @@ function sprr_renewalremindersemail($subscriber_details_first_name, $subscriber_
 
 																<p style="margin: 0 0 16px">
 																	<?php
-																	$body_content = stripslashes_deep(get_option('email_content'));
+																	$body_content = stripslashes_deep(get_option('email_content_' . $lang));
 
 																	$body_content =  str_replace("{first_name}", $subscriber_details_first_name, $body_content);
 																	$body_content =  str_replace("{last_name}", $subscriber_details_last_name, $body_content);

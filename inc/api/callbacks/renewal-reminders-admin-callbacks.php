@@ -133,9 +133,42 @@ class SPRRAdminCallbacks
 	<?php
 	}
 
+	/**
+	 * Displays a list of languages available. 
+	 * When an entry is clicked, we set that entry as a query parameter (lang)
+	 */
+	public function sprr_storeproAvailableLanguages()
+	{
+		$available_languages = ["en", "es", "fr", "it"]; //example languages
+
+	?>
+		<table>
+			<tr>
+				<td>
+					<div class="adm-tooltip-renew-rem" data-tooltip="<?php echo __("Select a language", TEXT_DOMAIN_NAME) ?>"> ? </div>
+				</td>
+				<td>
+
+					<div class="flex-horizontal align-items-center">
+						<?php foreach ($available_languages as $l) : ?>
+							<a href="?page=sp-renewal-reminders&tab=settings&lang=<?php echo $l ?>"><?php echo $l ?></a>
+						<?php endforeach; ?>
+					</div>
+				</td>
+			</tr>
+		</table>
+
+	<?php
+
+	}
+
 	public function sprr_storeproSubject()
 	{
-
+		$lang = "en"; //default language
+		if (isset($_GET["lang"])) { //the current language in the url query parameters
+			$lang = filter_input(INPUT_POST | INPUT_GET, 'lang', FILTER_SANITIZE_SPECIAL_CHARS);
+		}
+		$option_value = "email_subject_$lang";
 	?>
 		<table>
 			<tr>
@@ -143,7 +176,7 @@ class SPRRAdminCallbacks
 					<div class="adm-tooltip-renew-rem" data-tooltip="<?php echo __("Please add your Email subject", TEXT_DOMAIN_NAME) ?>"> ? </div>
 				</td>
 				<td>
-					<input class="renew-admin_email_subj" type="text" class="regular-text" name="email_subject" value="<?php echo stripslashes_deep(esc_attr(get_option('email_subject'))); ?>" placeholder="<?php echo __("Write Something Here!", TEXT_DOMAIN_NAME) ?> ">
+					<input class="renew-admin_email_subj" type="text" class="regular-text" name="<?php echo $option_value?>" value="<?php echo stripslashes_deep(esc_attr(get_option($option_value))); ?>" placeholder="<?php echo __("Write Something Here!", TEXT_DOMAIN_NAME) ?> ">
 				</td>
 			</tr>
 		</table>
@@ -154,7 +187,11 @@ class SPRRAdminCallbacks
 
 	public function sprr_storeproEmaiContent()
 	{
-
+		$lang = "en"; //default language
+		if (isset($_GET["lang"])) { //the current language in the url query parameters
+			$lang = filter_input(INPUT_POST | INPUT_GET, 'lang', FILTER_SANITIZE_SPECIAL_CHARS);
+		}
+		$option_value = "email_content_$lang";
 	?>
 
 		<table>
@@ -166,10 +203,10 @@ class SPRRAdminCallbacks
 
 					<?php
 					//new update to change the content editor to featured wp_editor 16/11/21 prnv_mtn 1.0.2
-					$default_content_rem =  stripslashes_deep(get_option('email_content'));
+					$default_content_rem =  stripslashes_deep(get_option($option_value));
 					$editor_id_rem = 'froalaeditor';
 					$arg = array(
-						'textarea_name' => 'email_content',
+						'textarea_name' => $option_value,
 						'media_buttons' => true,
 						'textarea_rows' => 8,
 						'quicktags' => true,

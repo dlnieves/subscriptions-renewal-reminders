@@ -100,6 +100,7 @@ class SPRRAdmin
 				'callback' => array($this->callbacks, 'sprr_storeproPluginSection'),
 				'page' => 'storepro_plugin'
 			)
+
 		);
 
 		$this->settings->sprr_setSections($args);
@@ -141,6 +142,20 @@ class SPRRAdmin
 					'class' => 'example-class',
 					'data-tip' => __('My custom tooltip!', TEXT_DOMAIN_NAME), //???
 					'data-mode' => 'above'
+				)
+			),
+			/**
+			 * Add a field with available languages just for selection
+			 */
+			array(
+				'id' => 'selected_lang',
+				'title' => __('Available Languages', TEXT_DOMAIN_NAME),
+				'callback' => array($this->callbacks, 'sprr_storeproAvailableLanguages'),
+				'page' => 'storepro_plugin',
+				'section' => 'storepro_admin_index_section_2',
+				'args' => array(
+					'label_for' => 'selected_lang',
+					'class' => 'example-class'
 				)
 			),
 			array(
