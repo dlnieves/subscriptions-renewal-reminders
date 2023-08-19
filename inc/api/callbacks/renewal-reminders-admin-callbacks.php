@@ -136,6 +136,7 @@ class SPRRAdminCallbacks
 	/**
 	 * Displays a list of languages available. 
 	 * When an entry is clicked, we set that entry as a query parameter (lang)
+	 * and the fields get properly loaded
 	 */
 	public function sprr_storeproAvailableLanguages()
 	{
@@ -148,7 +149,6 @@ class SPRRAdminCallbacks
 					<div class="adm-tooltip-renew-rem" data-tooltip="<?php echo __("Select a language", TEXT_DOMAIN_NAME) ?>"> ? </div>
 				</td>
 				<td>
-
 					<div class="flex-horizontal align-items-center">
 						<?php foreach ($available_languages as $l) : ?>
 							<a href="?page=sp-renewal-reminders&tab=settings&lang=<?php echo $l ?>"><?php echo $l ?></a>
@@ -162,13 +162,17 @@ class SPRRAdminCallbacks
 
 	}
 
+	/**
+	 * There will be 1 Subject per lang
+	 */
 	public function sprr_storeproSubject()
 	{
+		//reading the current lang from the url query parameters
 		$lang = "en"; //default language
-		if (isset($_GET["lang"])) { //the current language in the url query parameters
+		if (isset($_GET["lang"])) {
 			$lang = filter_input(INPUT_POST | INPUT_GET, 'lang', FILTER_SANITIZE_SPECIAL_CHARS);
 		}
-		$option_value = "email_subject_$lang";
+		$option_value = "email_subject_$lang"; //eg. email_subject_en, email_subject_es, email_subject_fr, etc.
 	?>
 		<table>
 			<tr>
@@ -176,7 +180,7 @@ class SPRRAdminCallbacks
 					<div class="adm-tooltip-renew-rem" data-tooltip="<?php echo __("Please add your Email subject", TEXT_DOMAIN_NAME) ?>"> ? </div>
 				</td>
 				<td>
-					<input class="renew-admin_email_subj" type="text" class="regular-text" name="<?php echo $option_value?>" value="<?php echo stripslashes_deep(esc_attr(get_option($option_value))); ?>" placeholder="<?php echo __("Write Something Here!", TEXT_DOMAIN_NAME) ?> ">
+					<input class="renew-admin_email_subj" type="text" class="regular-text" name="<?php echo $option_value ?>" value="<?php echo stripslashes_deep(esc_attr(get_option($option_value))); ?>" placeholder="<?php echo __("Write Something Here!", TEXT_DOMAIN_NAME) ?> ">
 				</td>
 			</tr>
 		</table>
@@ -185,13 +189,17 @@ class SPRRAdminCallbacks
 
 	}
 
+	/**
+	 * 1 Content per lang
+	 */
 	public function sprr_storeproEmaiContent()
 	{
+		//reading the current lang from the url query parameters
 		$lang = "en"; //default language
 		if (isset($_GET["lang"])) { //the current language in the url query parameters
 			$lang = filter_input(INPUT_POST | INPUT_GET, 'lang', FILTER_SANITIZE_SPECIAL_CHARS);
 		}
-		$option_value = "email_content_$lang";
+		$option_value = "email_content_$lang"; //eg. email_content_en, email_content_es, etc.
 	?>
 
 		<table>

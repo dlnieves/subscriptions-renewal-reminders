@@ -21,6 +21,8 @@ class SPRRAdmin
 
 	public $subpages = array();
 
+	public $available_languages = ["en", "es", "fr", "it"]; //example languages
+
 	public function sprr_register()
 	{
 		$this->settings = new SPRRSettingsApi();
@@ -69,19 +71,23 @@ class SPRRAdmin
 				'option_group' => 'storepro_options_group',
 				'option_name' => 'email_time',
 				'sanitize_callback' => 'sanitize_text_field'
-			),
-			array(
-				'option_group' => 'storepro_options_group',
-				'option_name' => 'email_subject',
-				'sanitize_callback' => 'sanitize_text_field'
-			),
-			array(
-				'option_group' => 'storepro_options_group',
-				'option_name' => 'email_content',
-				'sanitize_callback' => 'sanitize_text_field'
 			)
+
 		);
 
+		//Here, we need to register subject and content for each available language
+		foreach ($this->available_languages as $l) {
+			$args[] = array(
+				'option_group' => 'storepro_options_group',
+				'option_name' => 'email_subject_' . $l,
+				'sanitize_callback' => 'sanitize_text_field'
+			);
+			$args[] = array(
+				'option_group' => 'storepro_options_group',
+				'option_name' => 'email_content_' . $l,
+				'sanitize_callback' => 'sanitize_text_field'
+			);
+		}
 		$this->settings->sprr_setSettings($args);
 	}
 
