@@ -35,6 +35,14 @@
 defined( 'ABSPATH' ) or die( 'Hey, what are you doing here?' );
 
 /**
+ * Text domain key definition
+ */
+if (!defined('TEXT_DOMAIN_NAME')){
+    define('TEXT_DOMAIN_NAME', "subscriptions-renewal-reminders");
+}
+
+
+/**
  * Check if WooCommerce is active. if it isn't, disable Renewal Reminders.
  */
 include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
