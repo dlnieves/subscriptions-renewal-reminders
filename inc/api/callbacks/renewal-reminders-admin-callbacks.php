@@ -8,6 +8,11 @@
 
 class SPRRAdminCallbacks
 {
+	/**
+	 * TODO: Hardcoded for now
+	 */
+	private $available_languages = ["en", "es", "fr", "it"]; //example languages
+
 	public function sprr_adminDashboard()
 	{
 		return require SPRR_PLUGIN_DIR . 'templates/renewal-reminders-admin.php';
@@ -22,6 +27,16 @@ class SPRRAdminCallbacks
 	{
 	}
 
+	/**
+	 * Reads the current language from the query params
+	 */
+	public function getCurrentLanguage(){
+		$lang = "en"; //default language
+		if (isset($_GET["lang"])) {
+			$lang = filter_input(INPUT_POST | INPUT_GET, 'lang', FILTER_SANITIZE_SPECIAL_CHARS);
+		}
+		return $lang;
+	}
 
 	public function sprr_storeproEnDisable()
 	{
@@ -140,7 +155,8 @@ class SPRRAdminCallbacks
 	 */
 	public function sprr_storeproAvailableLanguages()
 	{
-		$available_languages = ["en", "es", "fr", "it"]; //example languages
+		//reading the current lang from the url query parameters
+		$lang = $this->getCurrentLanguage();
 
 	?>
 		<table>
@@ -150,8 +166,8 @@ class SPRRAdminCallbacks
 				</td>
 				<td>
 					<div class="flex-horizontal align-items-center">
-						<?php foreach ($available_languages as $l) : ?>
-							<a href="?page=sp-renewal-reminders&tab=settings&lang=<?php echo $l ?>"><?php echo $l ?></a>
+						<?php foreach ($this->available_languages as $l) : ?>
+							<a class="button <?php echo $lang == $l ? 'button-primary' : '' ?>" href="?page=sp-renewal-reminders&tab=settings&lang=<?php echo $l ?>"><?php echo $l ?></a>
 						<?php endforeach; ?>
 					</div>
 				</td>
@@ -164,33 +180,41 @@ class SPRRAdminCallbacks
 
 	/**
 	 * There will be 1 Subject per lang
+	 * Changed the way fields get displayed
+	 * We display the form field for the current language, and hidden fields for the rest.
 	 */
 	public function sprr_storeproSubject()
 	{
 		//reading the current lang from the url query parameters
-		$lang = "en"; //default language
-		if (isset($_GET["lang"])) {
-			$lang = filter_input(INPUT_POST | INPUT_GET, 'lang', FILTER_SANITIZE_SPECIAL_CHARS);
-		}
-		$option_value = "email_subject_$lang"; //eg. email_subject_en, email_subject_es, email_subject_fr, etc.
-	?>
-		<table>
-			<tr>
-				<td>
-					<div class="adm-tooltip-renew-rem" data-tooltip="<?php echo __("Please add your Email subject", TEXT_DOMAIN_NAME) ?>"> ? </div>
-				</td>
-				<td>
-					<input class="renew-admin_email_subj" type="text" class="regular-text" name="<?php echo $option_value ?>" value="<?php echo stripslashes_deep(esc_attr(get_option($option_value))); ?>" placeholder="<?php echo __("Write Something Here!", TEXT_DOMAIN_NAME) ?> ">
-				</td>
-			</tr>
-		</table>
+		$lang = $this->getCurrentLanguage();
 
+	?>
+		<?php foreach ($this->available_languages as $l) : ?>
+			<?php $option_value = "email_subject_$l"; //eg. email_subject_en, email_subject_es, email_subject_fr, etc.
+			?>
+			<?php if ($lang == $l) : ?>
+				<table>
+					<tr>
+						<td>
+							<div class="adm-tooltip-renew-rem" data-tooltip="<?php echo __("Please add your Email subject", TEXT_DOMAIN_NAME) ?>"> ? </div>
+						</td>
+						<td>
+							<input class="renew-admin_email_subj" type="text" class="regular-text" name="<?php echo $option_value ?>" value="<?php echo stripslashes_deep(esc_attr(get_option($option_value))); ?>" placeholder="<?php echo __("Write Something Here!", TEXT_DOMAIN_NAME) ?> ">
+						</td>
+					</tr>
+				</table>
+			<?php else : ?>
+				<input type="hidden" name="<?php echo $option_value ?>" value="<?php echo stripslashes_deep(esc_attr(get_option($option_value))); ?>">
+			<?php endif; ?>
+		<?php endforeach; ?>
 	<?php
 
 	}
 
 	/**
 	 * 1 Content per lang
+	 * Changed the way fields get displayed:
+	 * We display the form field for the current language, and hidden fields for the rest.
 	 */
 	public function sprr_storeproEmaiContent()
 	{
@@ -199,31 +223,8 @@ class SPRRAdminCallbacks
 		if (isset($_GET["lang"])) { //the current language in the url query parameters
 			$lang = filter_input(INPUT_POST | INPUT_GET, 'lang', FILTER_SANITIZE_SPECIAL_CHARS);
 		}
-		$option_value = "email_content_$lang"; //eg. email_content_en, email_content_es, etc.
-	?>
 
-		<table>
-			<tr>
-				<td>
-					<div class="adm-tooltip-renew-rem" data-tooltip="<?php echo __("Available placeholders:", TEXT_DOMAIN_NAME) ?> {first_name},{last_name}, {next_payment_date}"> ? </div>
-				</td>
-				<td>
-
-					<?php
-					//new update to change the content editor to featured wp_editor 16/11/21 prnv_mtn 1.0.2
-					$default_content_rem =  stripslashes_deep(get_option($option_value));
-					$editor_id_rem = 'froalaeditor';
-					$arg = array(
-						'textarea_name' => $option_value,
-						'media_buttons' => true,
-						'textarea_rows' => 8,
-						'quicktags' => true,
-						'wpautop' => false,
-						'teeny' => true
-					);
-
-
-					$blank_content_rem = "Hi {first_name} {last_name}, 
+		$blank_content_rem = "Hi {first_name} {last_name}, 
 		
 		This is an email just to let you know,your subscription is expires on {next_payment_date}! 
 		
@@ -231,20 +232,46 @@ class SPRRAdminCallbacks
 		
 		Thanks!";
 
-					if (strlen(($default_content_rem)) === 0) {
-						$default_content_rem .= $blank_content_rem;
-					}
-					//$stripped_value_sp = stripslashes_deep(esc_attr($default_content_rem));
+	?>
+		<?php foreach ($this->available_languages as $l) : ?>
+			<?php $option_value = "email_content_$l"; //eg. email_content_en, email_content_es, etc.
+			?>
+			<?php if ($lang == $l) : ?>
+				<table>
+					<tr>
+						<td>
+							<div class="adm-tooltip-renew-rem" data-tooltip="<?php echo __("Available placeholders:", TEXT_DOMAIN_NAME) ?> {first_name},{last_name}, {next_payment_date}"> ? </div>
+						</td>
+						<td>
+							<?php
+							//new update to change the content editor to featured wp_editor 16/11/21 prnv_mtn 1.0.2
+							$default_content_rem =  stripslashes_deep(get_option($option_value));
+							$editor_id_rem = 'froalaeditor';
+							$arg = array(
+								'textarea_name' => $option_value,
+								'media_buttons' => true,
+								'textarea_rows' => 8,
+								'quicktags' => true,
+								'wpautop' => false,
+								'teeny' => true
+							);
 
-					wp_editor($default_content_rem, $editor_id_rem, $arg);
+							if (strlen(($default_content_rem)) === 0) {
+								$default_content_rem .= $blank_content_rem;
+							}
+							//$stripped_value_sp = stripslashes_deep(esc_attr($default_content_rem));
 
-					?>
+							wp_editor($default_content_rem, $editor_id_rem, $arg);
 
-					<p class="notice-rem-text"><?php echo __("Save the settings to get contents in the email", TEXT_DOMAIN_NAME) ?> </p>
-				</td>
-			</tr>
-		</table>
-
+							?>
+							<p class="notice-rem-text"><?php echo __("Save the settings to get contents in the email", TEXT_DOMAIN_NAME) ?> </p>
+						</td>
+					</tr>
+				</table>
+			<?php else : ?>
+				<input type="hidden" name="<?php echo $option_value ?>" value="<?php echo stripslashes_deep(get_option($option_value)) ?>" />
+			<?php endif; ?>
+		<?php endforeach; ?>
 <?php
 
 
